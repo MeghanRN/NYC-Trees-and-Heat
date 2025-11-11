@@ -1,8 +1,9 @@
-# 🌳 NYC Trees & Heat — Interactive Visualization
+# 🌳 NYC Trees & Heat
 
-**Author:** Meghan Kret
+---
+**Author:** Meghan Kret   
 **Class:** Data Visualization - Midterm Part 2  
-**Due Date:** November 11 2025
+**Due Date:** November 11 2025    
 ---
 
 ## 🧭 Overview
