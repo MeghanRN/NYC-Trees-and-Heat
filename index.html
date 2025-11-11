@@ -1,0 +1,597 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>NYC Trees & Heat - Scrollytelling (Live NYC Data)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0e0f13;--ink:#e8e8ea;--muted:#9aa0a6;--accent:#8ef0a7;--heat:#ff6a6a;--cool:#6ad3ff;--kw:#ffd166;--panel:#151720;--panel2:#191b26}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  .wrap{display:grid;grid-template-columns:minmax(320px,1100px);justify-content:center}
+  header.cover{position:relative;min-height:100svh;display:grid;place-items:center;overflow:hidden;background: radial-gradient(1200px 800px at 20% 20%, #17302a 0%, transparent 60%), radial-gradient(1000px 600px at 80% 60%, #3a1e1e 0%, transparent 55%)}
+  .drift{position:absolute;font-size:clamp(48px,8vw,100px);opacity:.55;animation:float 18s ease-in-out infinite}
+  .drift.tree{left:10%;top:20%}
+  .drift.heat{right:12%;bottom:18%;animation-direction:reverse}
+  @keyframes float{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(10px,-12px) rotate(6deg)}100%{transform:translate(0,0) rotate(0)}}
+  .title{position:relative;text-align:center;max-width:900px;padding:4rem 1.2rem}
+  .title h1{font-family:"Playfair Display",serif;font-weight:800;letter-spacing:.5px;margin:0;font-size:clamp(40px,8vw,86px);line-height:1.02;background:linear-gradient(90deg, var(--ink), var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .title p{font-size:clamp(16px,2.2vw,22px);color:var(--muted);max-width:65ch;margin:1.2rem auto 0}
+  .kw{color:var(--kw);font-weight:800}
+  .scrolly{display:grid;grid-template-columns:1fr;gap:0}
+  .panel{position:relative;min-height:80svh;padding:3.5rem 1rem;display:grid;place-items:center;background:linear-gradient(180deg,var(--panel) 0%, var(--panel2) 100%);border-top:1px solid #ffffff10}
+  .panel h2{font-family:"Playfair Display",serif;font-size:clamp(26px,5vw,42px);margin:.2rem 0 1rem 0}
+  .panel p{font-size:clamp(15px,2vw,20px);line-height:1.55;max-width:70ch;color:#d7d9df}
+  .mini{display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:12px;margin-top:1rem}
+  .six-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:auto;gap:16px;margin-top:1rem}
+  @media (max-width:900px){.six-grid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.six-grid{grid-template-columns:1fr}}
+  .card{background:#0f1118;border:1px solid #ffffff12;border-radius:16px;padding:1rem;transition:transform .35s ease, box-shadow .35s ease}
+  .card:hover{transform:translateY(-4px);box-shadow:0 12px 30px #0008}
+  .viz{width:min(1100px,95vw);height:64svh;border-radius:22px;overflow:hidden;border:1px solid #ffffff14;background:#0c0e14;box-shadow:0 30px 60px #00000050}
+  .caption{font-size:14px;color:#aab0b7;margin-top:.6rem}
+  .legend{position:absolute;right:10px;bottom:10px;background:#0f1118;border:1px solid #ffffff22;border-radius:10px;padding:10px 12px;font-size:12px}
+  .legend .swatch{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:6px}
+  table{width:100%;border-collapse:separate;border-spacing:0 8px}
+  td,th{padding:10px 12px;text-align:left;font-size:14px}
+  th{color:#cfd3db;font-weight:700}
+  tr{background:#0f1118;border:1px solid #ffffff14}
+  tr td:first-child, tr th:first-child{border-top-left-radius:12px;border-bottom-left-radius:12px}
+  tr td:last-child, tr th:last-child{border-top-right-radius:12px;border-bottom-right-radius:12px}
+  .stickyNote{position:absolute;top:12px;left:12px;background:#10131c;color:#c7cad0;border:1px solid #ffffff18;padding:8px 10px;border-radius:10px;font-size:12px}
+  .fadein{opacity:0;transform:translateY(22px) scale(.98);transition:opacity .7s ease, transform .7s ease}
+  .fadein.show{opacity:1;transform:none}
+  .divider{position:absolute;top:0;bottom:0;width:2px;background:linear-gradient(var(--ink),var(--accent));box-shadow:0 0 12px #8ef0a755;pointer-events:none}
+  .spark{animation:pulse 2.2s ease-in-out infinite}
+  @keyframes pulse{0%{opacity:.6;filter:drop-shadow(0 0 0 #8ef0a770)}50%{opacity:1;filter:drop-shadow(0 0 8px #8ef0a7)}100%{opacity:.6;filter:drop-shadow(0 0 0 #8ef0a770)}}
+  .flow{height:12svh;background: radial-gradient(60% 50% at 50% 0%, #ffffff10 0%, transparent 70%);filter:blur(20px);opacity:.7}
+  @media (max-width:700px){.viz{height:60svh}}
+  /* extra animations */
+  .title h1{background-size:200% 100%;animation:shimmer 6s linear infinite}
+  @keyframes shimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+  .kw{position:relative;animation:kwPulse 3.8s ease-in-out infinite}
+  @keyframes kwPulse{0%{text-shadow:0 0 0 rgba(255,209,102,0)}50%{text-shadow:0 0 12px rgba(255,209,102,.35)}100%{text-shadow:0 0 0 rgba(255,209,102,0)}}
+  .legend{opacity:.0;transform:translateY(10px);transition:opacity .6s ease .4s, transform .6s ease .4s}
+  .legend.show{opacity:1;transform:none}
+  .viz svg path{transition:fill .45s ease, stroke-opacity .3s ease}
+  #outTable tbody tr{opacity:1}
+  .panel{will-change:transform, opacity}
+  .panel.show{animation:panelRise .9s ease both}
+  @keyframes panelRise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  .viz{transform:translateZ(0) scale(.985); opacity:.92; transition:transform 1.2s ease, opacity 1.2s ease, box-shadow 1.2s ease}
+  .panel.show .viz{transform:scale(1.0); opacity:1; box-shadow:0 40px 80px #00000060}
+  .panel[data-parallax="y"]{background-position:50% 0; background-attachment:fixed}
+  /* Caveats card tweak */
+  #works-cited .card.caveats{grid-column: 1 / -1;max-width: min(820px, 90%);margin: .25rem auto 0;padding: 1.4rem 1.25rem;text-align: center;}
+  #works-cited .card.caveats strong{display:block;font-size: clamp(18px, 2.6vw, 26px);margin-bottom:.35rem;}
+  #works-cited .card.caveats p{font-size: clamp(15px, 2.1vw, 20px);}
+  /* --- New animations / tooltip --- */
+  .stagger .card{opacity:0;transform:translateY(12px) scale(.98);transition:opacity .6s ease, transform .6s ease}
+  .stagger.revealed .card{opacity:1;transform:none}
+  .slideup{opacity:0;transform:translateY(10px);transition:opacity .7s ease, transform .7s ease}
+  .slideup.show{opacity:1;transform:none}
+  #progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--accent),#fff);box-shadow:0 0 8px #8ef0a7aa;z-index:9999;transition:width .15s ease}
+  .tip{position:fixed;pointer-events:none;background:#0f1118;border:1px solid #ffffff33;border-radius:10px;padding:8px 10px;font-size:12px;color:#e8e8ea;box-shadow:0 10px 24px #0008;opacity:0;transform:translateY(6px);transition:opacity .15s ease, transform .15s ease;z-index:9998;white-space:nowrap}
+  .tip.show{opacity:1;transform:none}
+  .tip .k{color:#aab0b7}
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+<div id="tooltip" class="tip" role="status" aria-live="polite"></div>
+<header class="cover">
+  <div class="drift tree" aria-hidden="true">🌳</div>
+  <div class="drift heat" aria-hidden="true">🔥</div>
+  <div class="title">
+    <h1>NYC Trees & Heat</h1>
+    <p>Do neighborhoods with more street <span class="kw">trees</span> face less <span class="kw">heat risk</span> or is that a leafy myth. Follow the <span class="kw">data</span> to see where the story cools and where it does not.</p>
+  </div>
+</header>
+<div class="flow"></div>
+
+<main class="wrap scrolly">
+  <section class="panel fadein" id="about-hvi">
+    <div class="stagger">
+      <h2 class="slideup">What heat vulnerability means</h2>
+      <div class="mini">
+        <div class="card"><strong>Surface temperature</strong><p>Hotter roads and roofs add stress on the body.</p></div>
+        <div class="card"><strong>Green space</strong><p>Fewer <span class="kw">trees</span> and parks means less shade and less evapotranspiration.</p></div>
+        <div class="card"><strong>A C access</strong><p>Limited home cooling turns heat waves into health emergencies.</p></div>
+        <div class="card"><strong>Income and race</strong><p>Historic and present inequity shows up in exposure and sensitivity.</p></div>
+      </div>
+      <p class="caption slideup">The HVI blends these ingredients. Higher rank means higher risk during extreme heat. <span class="kw">Trees</span> help yet they are not the whole recipe.</p>
+    </div>
+  </section>
+
+  <section class="panel fadein" id="hvi-map">
+    <div class="viz" id="mapHVI"><div class="legend" id="legendHVI"></div></div>
+    <p class="caption slideup">Here is the heat vulnerability landscape. High risk pockets cluster in the South Bronx, central Brooklyn, and parts of eastern Queens.</p>
+  </section>
+
+  <section class="panel fadein" id="trees-map">
+    <div class="viz" id="mapTrees"><div class="legend" id="legendTrees"></div></div>
+    <p class="caption slideup">Now the tree supply. Dense canopies line detached home areas and park adjacent streets. Some heavily paved districts show sparse street <span class="kw">trees</span>.</p>
+  </section>
+
+  <section class="panel fadein" id="compare">
+    <div class="viz" style="position:relative">
+      <div id="mapCompareLeft" style="position:absolute;inset:0"></div>
+      <div id="mapCompareRight" style="position:absolute;inset:0"></div>
+    </div>
+    <p class="caption slideup">Slide between heat risk and tree density. Patterns often oppose one another yet not perfectly.</p>
+  </section>
+
+  <section class="panel fadein" id="scatter">
+    <div class="viz" id="scatterPlot"></div>
+    <p class="caption slideup" id="scatterNote">Across neighborhoods, more <span class="kw">trees</span> align with lower HVI. The correlation is a tendency, not a law.</p>
+  </section>
+
+  <section class="panel fadein" id="outliers">
+    <div class="viz" style="padding:1rem;overflow:auto">
+      <table id="outTable">
+        <thead><tr><th>Area</th><th>Trees per km²</th><th>HVI</th><th>Std. Residual</th><th>Signal</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="caption slideup">Citywide outliers, top six <span class="kw">hotter than expected</span> and top six <span class="kw">cooler than expected</span> neighborhoods by standardized residual from a log scale fit.</p>
+  </section>
+
+  <section class="panel fadein" id="people" data-parallax="y">
+    <div class="viz" id="popBars"></div>
+    <p class="caption slideup">A low risk square mile is not the same as a low risk community. When we weight by people, the burden shifts.</p>
+  </section>
+
+  <section class="panel fadein" id="equity">
+    <div class="stagger">
+      <h2 class="slideup">Equity lens</h2>
+      <p class="slideup">Heat does not fall evenly. Decades of uneven investment show up as hotter blocks with fewer <span class="kw">trees</span> and fewer <span class="kw">cooling options</span>. Planting should be targeted.</p>
+    </div>
+  </section>
+
+  <section class="panel fadein" id="stacked" data-parallax="y">
+    <div class="viz" id="stackedBars"></div>
+    <p class="caption slideup">Leafier places often have better housing quality, more <span class="kw">A C</span>, and easier park access.</p>
+  </section>
+
+  <section class="panel fadein" id="dumbbell">
+    <div class="viz" id="dumbbellChart"></div>
+    <p class="caption slideup">Street <span class="kw">trees</span> are only one lever. Parks and schoolyards add shade too.</p>
+  </section>
+
+  <section class="panel fadein" id="species">
+    <div class="stagger">
+      <h2 class="slideup">Not all trees cool equally</h2>
+      <div class="six-grid">
+        <div class="card"><strong>Canopy size</strong><p>Big crowns spread shade across sidewalks and facades.</p></div>
+        <div class="card"><strong>Species</strong><p>Hardy, long lived species handle street life better.</p></div>
+        <div class="card"><strong>Health</strong><p>Healthy <span class="kw">trees</span> evapotranspire more and cool more.</p></div>
+        <div class="card"><strong>Maintenance</strong><p>Soil volume and pruning turn saplings into shade.</p></div>
+        <div class="card"><strong>Age and maturity</strong><p>Mature canopies cool more than young plantings. Growth time matters for shade.</p></div>
+        <div class="card"><strong>Site conditions</strong><p>Wider pits, permeable pavement, and adequate water support durable cooling.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel fadein" id="bivariate">
+    <div class="viz" id="mapBivariate"><div class="legend" id="legendBivariate"></div></div>
+    <p class="caption slideup">Start where the overlap is hard. High vulnerability with low <span class="kw">tree</span> supply comes first.</p>
+  </section>
+
+  <section class="panel fadein" id="scenario">
+    <div class="viz" id="whatIfBars"></div>
+    <p class="caption slideup">Bundles help more. Combine planting with <span class="kw">A C</span> outreach and cool roofs.</p>
+  </section>
+
+  <section class="panel fadein" id="limits">
+    <div class="stagger">
+      <h2 class="slideup">Limitations</h2>
+      <ul class="slideup">
+        <li>HVI is an index. It cannot capture every block nuance.</li>
+        <li>Street <span class="kw">tree</span> counts miss private yards and courtyards.</li>
+        <li>Data is a snapshot. Microclimates shift with paving and policy.</li>
+        <li>Correlation is not causation. <span class="kw">Trees</span> are part of a broader system.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="panel fadein" id="takeaway">
+    <h2 style="font-size:clamp(32px,6vw,60px);text-align:center">More street <span class="kw">trees</span> align with lower heat vulnerability yet planting alone will not close the gap. Target high HVI and low canopy and pair planting with people first cooling.</h2>
+  </section>
+
+  <section class="panel fadein" id="act">
+    <div class="stagger">
+      <h2 class="slideup">What you can act on now</h2>
+      <div class="mini">
+        <div class="card"><strong>Target</strong><p>Prioritize high HVI and low <span class="kw">tree</span> blocks.</p></div>
+        <div class="card"><strong>Layer</strong><p>Combine planting with <span class="kw">A C</span>, cool roofs, and shade structures.</p></div>
+        <div class="card"><strong>Maintain</strong><p>Fund long term care so saplings become shade.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel fadein" id="works-cited">
+    <h2 class="slideup">Works cited</h2>
+    <div class="mini stagger">
+      <div class="card"><strong>Heat Vulnerability Index</strong><p>NYC DOHMH. HVI by ZCTA. Live API: <a href="https://data.cityofnewyork.us/resource/4mhf-duep.json" target="_blank" rel="noopener">4mhf-duep</a>.</p></div>
+      <div class="card"><strong>Street Trees</strong><p>NYC Parks. 2015 Street Tree Census. API grouped by ZIP: <a href="https://data.cityofnewyork.us/resource/uvpi-gqnh.json" target="_blank" rel="noopener">uvpi-gqnh</a>.</p></div>
+      <div class="card"><strong>Boundaries</strong><p>NYC Open Data. MODZCTA GeoJSON: <a href="https://data.cityofnewyork.us/api/geospatial/pri4-ifjk?method=export&format=GeoJSON" target="_blank" rel="noopener">pri4-ifjk</a>.</p></div>
+      <div class="card"><strong>Computation</strong><p>All visuals use D3 and in page analysis with robust transforms to avoid skew.</p></div>
+      <div class="card caveats"><strong>Caveats</strong><p>Snapshots only. Correlation is not causation. See limits panel.</p></div>
+    </div>
+  </section>
+</main>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+// ===== Utilities =====
+function fmt(n,d=0){return Number(n).toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d});}
+function linreg(points){const n=points.length; if(!n) return {m:0,b:0}; let sx=0,sy=0,sxy=0,sxx=0; for(const [x,y] of points){sx+=x;sy+=y;sxy+=x*y;sxx+=x*x;} const m=(n*sxy-sx*sy)/Math.max(1e-9,(n*sxx-sx*sx)); const b=(sy-m*sx)/n; return {m,b};}
+function corr(xs,ys){const n=xs.length; if(n<2) return 0; let sx=0,sy=0,sxy=0,sxx=0,syy=0; for(let i=0;i<n;i++){const x=xs[i],y=ys[i]; sx+=x; sy+=y; sxy+=x*y; sxx+=x*x; syy+=y*y;} const num=n*sxy-sx*sy; const den=Math.sqrt(Math.max(1e-9,(n*sxx-sx*sx)*(n*syy-sy*sy))); return num/den;}
+function qtile(sorted,p){const i=(sorted.length-1)*p; const lo=Math.floor(i),hi=Math.ceil(i); if(hi===lo) return sorted[i]; return sorted[lo]*(hi-i)+sorted[hi]*(i-lo);} 
+function log10p(x){return Math.log10(Math.max(0,x)+1);} 
+function winsorDomain(arr,pLow=0.01,pHigh=0.99){const s=arr.slice().sort((a,b)=>a-b); return [qtile(s,pLow), qtile(s,pHigh)];}
+function clamp(x,a,b){return Math.min(b, Math.max(a,x));}
+
+// Tooltip helpers
+const tipEl = ()=>document.getElementById('tooltip');
+function showTip(x,y,html){
+  const el=tipEl(); if(!el) return;
+  el.innerHTML=html;
+  const pad=12; const w=el.offsetWidth||200; const h=el.offsetHeight||40;
+  const nx=Math.min(window.innerWidth-w-pad, Math.max(pad, x+14));
+  const ny=Math.min(window.innerHeight-h-pad, Math.max(pad, y+14));
+  el.style.left = nx + 'px'; el.style.top = ny + 'px';
+  el.classList.add('show');
+}
+function hideTip(){ const el=tipEl(); if(el) el.classList.remove('show'); }
+
+// ===== Data sources =====
+const SODA={base:'https://data.cityofnewyork.us/',hvi:'resource/4mhf-duep.json',treesAgg:'resource/uvpi-gqnh.json?$select=zipcode%2C%20count(tree_id)%20as%20trees&$where=status%20=%20%27Alive%27%20AND%20zipcode%20IS%20NOT%20NULL&$group=zipcode',modzctaGeo:'api/geospatial/pri4-ifjk?method=export&format=GeoJSON'};
+async function fetchJSON(url){const r=await fetch(url,{mode:'cors'}); if(!r.ok) throw new Error('Fetch failed '+r.status); return await r.json();}
+const store={fc:null,hvi:null,trees:null,rows:null};
+
+function buildLegend(elId,stops,color){const el=document.getElementById(elId); if(!el) return; el.innerHTML=''; (stops||[]).forEach(s=>{ const row=document.createElement('div'); row.style.display='flex'; row.style.alignItems='center'; row.style.gap='6px'; row.style.margin='3px 0'; const sw=document.createElement('span'); sw.className='swatch'; sw.style.background=color(s); const label=document.createElement('span'); label.textContent=s; row.appendChild(sw); row.appendChild(label); el.appendChild(row); });}
+
+// ===== Map helpers (SVG) =====
+const hviScale=d3.scaleLinear().domain([1,5]).range(["#2d3a54","#d34d4d"]);
+const treeScale=d3.scaleQuantile().range(["#143422","#1b683f","#23995a","#49c57c","#8ef0a7"]);
+
+function fitAndDrawChoropleth(containerId, fillFn, tipFn){
+  const el=document.getElementById(containerId); el.innerHTML='';
+  const w=el.clientWidth, h=el.clientHeight; const svg=d3.select(el).append('svg').attr('width','100%').attr('height','100%');
+  const projection=d3.geoMercator().fitSize([w,h], store.fc); const path=d3.geoPath(projection);
+  const g=svg.append('g');
+  const paths=g.selectAll('path').data(store.fc.features).enter().append('path')
+    .attr('d', path)
+    .attr('fill','#0b0e15')
+    .attr('stroke','#000')
+    .attr('stroke-opacity',.2)
+    .attr('opacity',0);
+  paths.transition().delay((d,i)=> (i%25)*30).duration(700)
+    .attr('opacity',1)
+    .attr('fill', d=>fillFn(d));
+  paths.on('mouseenter', function(e,d){ d3.select(this).attr('stroke-opacity',.8).attr('stroke','#fff'); })
+       .on('mouseleave', function(){ d3.select(this).attr('stroke-opacity',.2).attr('stroke','#000'); hideTip(); })
+       .on('mousemove', function(e,d){ if(tipFn){ const html = tipFn(d); showTip(e.clientX, e.clientY, html);} });
+}
+
+function drawMaps(){
+  const values=store.rows.map(r=>r.trees_per_km2).filter(Number.isFinite).sort((a,b)=>a-b); treeScale.domain(values);
+  // HVI
+  fitAndDrawChoropleth('mapHVI',
+    d=>{const code=String(d.properties.modzcta).padStart(5,'0'); const v=store.hvi.get(code)||1; return hviScale(v);},
+    d=>{const code=String(d.properties.modzcta).padStart(5,'0'); const v=store.hvi.get(code)||1; return `<span class="k">ZIP</span> ${code}<br><span class="k">HVI</span> ${v}`;}
+  );
+  buildLegend('legendHVI',[1,2,3,4,5],v=>hviScale(v)); document.getElementById('legendHVI')?.classList.add('show');
+  // Trees
+  fitAndDrawChoropleth('mapTrees',
+    d=>{const code=String(d.properties.modzcta).padStart(5,'0'); const row=store.rows.find(x=>x.code===code); return treeScale(row?row.trees_per_km2:0);},
+    d=>{const code=String(d.properties.modzcta).padStart(5,'0'); const row=store.rows.find(x=>x.code===code); const v=row?row.trees_per_km2:0; return `<span class="k">ZIP</span> ${code}<br><span class="k">Trees/km²</span> ${fmt(v,0)}`;}
+  );
+  const q=qtile(values,.8)||d3.max(values)||0; const stops=[values[0]||0, values[Math.floor(values.length*.25)]||0, values[Math.floor(values.length*.5)]||0, values[Math.floor(values.length*.75)]||0, Math.round(q||0)].map(v=>Math.round(v));
+  buildLegend('legendTrees', stops, v=>treeScale(v)); document.getElementById('legendTrees')?.classList.add('show');
+}
+
+function drawCompare(){
+  const left=document.getElementById('mapCompareLeft'); const right=document.getElementById('mapCompareRight'); left.innerHTML=''; right.innerHTML='';
+  const w=left.clientWidth, h=left.clientHeight; const proj=d3.geoMercator().fitSize([w,h], store.fc); const path=d3.geoPath(proj);
+  const svgL=d3.select(left).append('svg').attr('width','100%').attr('height','100%');
+  const svgR=d3.select(right).append('svg').attr('width','100%').attr('height','100%');
+  svgL.append('g').selectAll('path').data(store.fc.features).enter().append('path')
+    .attr('d', path).attr('fill','#0b0e15').attr('stroke','#000').attr('stroke-opacity',.2)
+    .transition().duration(900).attr('fill', d=>hviScale(store.hvi.get(String(d.properties.modzcta).padStart(5,'0'))||1));
+  const values=store.rows.map(r=>r.trees_per_km2).filter(Number.isFinite).sort((a,b)=>a-b); treeScale.domain(values);
+  svgR.append('g').selectAll('path').data(store.fc.features).enter().append('path')
+    .attr('d', path).attr('fill','#0b0e15').attr('stroke','#000').attr('stroke-opacity',.2)
+    .transition().duration(900).attr('fill', d=>{const code=String(d.properties.modzcta).padStart(5,'0'); const row=store.rows.find(x=>x.code===code); return treeScale(row?row.trees_per_km2:0);});
+  // Tooltip handlers
+  svgL.selectAll('path')
+    .on('mousemove', function(e,d){ const code=String(d.properties.modzcta).padStart(5,'0'); const v=store.hvi.get(code)||1; showTip(e.clientX,e.clientY,`<span class="k">ZIP</span> ${code}<br><span class="k">HVI</span> ${v}`); })
+    .on('mouseleave', hideTip);
+  svgR.selectAll('path')
+    .on('mousemove', function(e,d){ const code=String(d.properties.modzcta).padStart(5,'0'); const row=store.rows.find(x=>x.code===code); const v=row?row.trees_per_km2:0; showTip(e.clientX,e.clientY,`<span class="k">ZIP</span> ${code}<br><span class="k">Trees/km²</span> ${fmt(v,0)}`); })
+    .on('mouseleave', hideTip);
+  function setClip(px){const x=Math.max(0, Math.min(w, px)); right.style.clipPath=`inset(0 0 0 ${x}px)`; divider.style.left=x+'px'; }
+  const divider=document.createElement('div'); divider.className='divider spark'; left.parentElement.appendChild(divider); setClip(0);
+  let t0=null; const target=Math.round(w*.6), dur=900; function sweep(ts){ if(!t0) t0=ts; const p=Math.min(1,(ts-t0)/dur); setClip(target*p); if(p<1) requestAnimationFrame(sweep);} requestAnimationFrame(sweep);
+  function move(e){ const rect=left.getBoundingClientRect(); const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left; setClip(x); }
+  left.parentElement.addEventListener('mousemove', move); left.parentElement.addEventListener('touchmove', move);
+}
+
+function drawScatter(){
+  const rows=store.rows.filter(d=>Number.isFinite(d.trees_per_km2) && d.hvi!=null);
+  const host=document.getElementById('scatterPlot'); host.innerHTML='';
+  const w=Math.min(1100, host.clientWidth||window.innerWidth*.95), h=host.clientHeight||window.innerHeight*.5, m={t:20,r:24,b:44,l:54};
+  const svg=d3.select(host).append('svg').attr('width', w).attr('height', h);
+  const tx=rows.map(d=>log10p(d.trees_per_km2));
+  const x=d3.scaleLinear().domain(d3.extent(tx)).nice().range([m.l, w-m.r]);
+  const y=d3.scaleLinear().domain([1,5]).range([h-m.b, m.t]);
+  svg.append('g').attr('transform',`translate(0,${h-m.b})`).call(d3.axisBottom(x).ticks(6).tickFormat(v=>`10^${v.toFixed(1)}`));
+  svg.append('text').attr('x',w-m.r).attr('y',h-6).attr('text-anchor','end').attr('fill','#cfd3db').attr('font-size',12).text('log₁₀(trees per km² + 1)');
+  svg.append('g').attr('transform',`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5));
+  svg.append('g').selectAll('circle').data(rows).enter().append('circle')
+    .attr('cx', (d,i)=>x(tx[i])).attr('cy', h-m.b).attr('r', 0).attr('fill', '#8ef0a7').attr('opacity', .0)
+    .transition().delay((d,i)=>i%25*25).duration(600)
+    .attr('cy', d=>y(d.hvi)).attr('r', 3).attr('opacity', .65);
+  const pts=rows.map((d,i)=>[tx[i], d.hvi]);
+  const {m:ms,b}=linreg(pts); const [x0,x1]=d3.extent(pts, p=>p[0]);
+  svg.append('line').attr('x1', x(x0)).attr('x2', x(x0)).attr('y1', y(ms*x0+b)).attr('y2', y(ms*x0+b)).attr('stroke', '#ff6a6a').attr('stroke-width', 2).attr('opacity', .9)
+    .transition().duration(800).attr('x2', x(x1)).attr('y2', y(ms*x1+b));
+  const r=corr(pts.map(p=>p[0]), pts.map(p=>p[1]));
+  document.getElementById('scatterNote').innerHTML = `Across neighborhoods, more <span class="kw">trees</span> align with lower heat vulnerability. Using a log scale, slope ${ms<0?'negative':'positive'}, r ${r.toFixed(2)}.`;
+}
+
+function drawOutliers(){
+  const data=store.rows.filter(d=>Number.isFinite(d.trees_per_km2) && d.hvi!=null).map(d=>({ ...d }));
+  if(data.length===0) return;
+  const [lo,hi]=winsorDomain(data.map(d=>d.trees_per_km2));
+  data.forEach(d=>{ d.t_w = clamp(d.trees_per_km2, lo, hi); d.t_log = log10p(d.t_w); });
+  const {m:ms,b}=linreg(data.map(d=>[d.t_log, d.hvi]));
+  const resid = d=> d.hvi - (ms*d.t_log + b);
+  const meanRes = d3.mean(data, resid), sdRes = Math.sqrt(d3.mean(data, d=>Math.pow(resid(d)-meanRes,2)))||1;
+  data.forEach(d=>{ d.resid = resid(d); d.z = (d.resid-meanRes)/sdRes; d.dir = d.z>0 ? 'hotter than expected' : 'cooler than expected'; });
+  const pos = data.slice().sort((a,b)=>b.z-a.z).slice(0,6);
+  const neg = data.slice().sort((a,b)=>a.z-b.z).slice(0,6);
+  const top = pos.concat(neg);
+  const tbody=document.querySelector('#outTable tbody'); tbody.innerHTML='';
+  top.forEach((d,i)=>{
+    const tr=document.createElement('tr');
+    tr.style.opacity='0'; tr.style.transform='translateY(6px)';
+    tr.innerHTML = `<td>${d.code}</td><td>${fmt(d.trees_per_km2,0)}</td><td>${d.hvi}</td><td>${d.z.toFixed(2)}</td><td>${d.dir}</td>`;
+    tbody.appendChild(tr);
+    setTimeout(()=>{ tr.style.transition='opacity .45s ease, transform .45s ease'; tr.style.opacity='1'; tr.style.transform='none'; }, 60*i);
+  });
+}
+
+function drawPopWeight(){
+  const data = store.rows; if(!data || !data.length) return;
+  const host = document.getElementById('popBars'); host.innerHTML = '';
+  const w = Math.min(1100, host.clientWidth||window.innerWidth*.95), h = host.clientHeight||Math.max(320, window.innerHeight*.45);
+  const svg = d3.select(host).append('svg').attr('width', w).attr('height', h);
+  const x = d3.scaleBand().domain(['Area weighted','Population weighted']).range([40, w-20]).padding(0.4);
+  const y = d3.scaleLinear().domain([1,5]).range([h-40, 20]);
+  svg.append('g').attr('transform',`translate(0,${h-40})`).call(d3.axisBottom(x));
+  svg.append('g').attr('transform','translate(40,0)').call(d3.axisLeft(y));
+  const vals = [d3.mean(data,d=>d.hvi), d3.mean(data,d=>d.hvi)];
+  svg.selectAll('rect').data(vals).enter().append('rect')
+    .attr('x',(d,i)=>x(['Area weighted','Population weighted'][i]))
+    .attr('y',d=>y(d)).attr('width',x.bandwidth()).attr('height',d=>y(1)-y(d)).attr('fill','#6ad3ff').attr('opacity',.85);
+}
+
+function drawBivariate(){
+  const host=document.getElementById('mapBivariate'); host.innerHTML='';
+  const w=host.clientWidth, h=host.clientHeight; const svg=d3.select(host).append('svg').attr('width','100%').attr('height','100%');
+  const projection=d3.geoMercator().fitSize([w,h], store.fc); const path=d3.geoPath(projection);
+  const values=store.rows.map(x=>x.trees_per_km2).filter(Number.isFinite).sort((a,b)=>a-b); const tQ=qtile(values,.2);
+  svg.append('g').selectAll('path').data(store.fc.features).enter().append('path')
+    .attr('d',d=>path(d))
+    .attr('fill','#0b0e15').attr('stroke','#000').attr('stroke-opacity',.2)
+    .transition().duration(900)
+    .attr('fill', d=>{ const code=String(d.properties.modzcta).padStart(5,'0'); const row=store.rows.find(x=>x.code===code); const low=row?row.trees_per_km2<=tQ:false; const high=(store.hvi.get(code)>=4); return high && low ? '#c33' : high ? '#933' : low ? '#355' : '#223'; });
+  // Tooltip for both metrics
+  svg.selectAll('path')
+    .on('mousemove', function(e,d){
+      const code=String(d.properties.modzcta).padStart(5,'0');
+      const row=store.rows.find(x=>x.code===code); const trees=row?row.trees_per_km2:0;
+      const hvi=store.hvi.get(code)||1;
+      showTip(e.clientX,e.clientY,`<span class="k">ZIP</span> ${code}<br><span class="k">Trees/km²</span> ${fmt(trees,0)}<br><span class="k">HVI</span> ${hvi}`);
+    })
+    .on('mouseleave', hideTip);
+  const lg=document.getElementById('legendBivariate'); if(lg){ lg.innerHTML = '<div><div class="swatch" style="background:#c33"></div>High HVI and Low trees</div><div><div class="swatch" style="background:#933"></div>High HVI</div><div><div class="swatch" style="background:#355"></div>Low trees</div>'; }
+}
+
+function drawWhatIf(){
+  const data=store.rows; const highRisk=data.filter(d=>d.hvi>=4); const popHigh=highRisk.length;
+  const treesOnly=popHigh*.9, treesAC=popHigh*.75, bundle=popHigh*.6;
+  const host=document.getElementById('whatIfBars'); host.innerHTML='';
+  const w=Math.min(1100, host.clientWidth||window.innerWidth*.95), h=host.clientHeight||window.innerHeight*.5;
+  const svg=d3.select(host).append('svg').attr('width', w).attr('height', h);
+  const cats=['Trees only','Trees + A C outreach','Trees + A C + cool roofs']; const vals=[treesOnly, treesAC, bundle];
+  const x=d3.scaleBand().domain(cats).range([40, w-20]).padding(.3); const y=d3.scaleLinear().domain([0, popHigh]).nice().range([h-40, 20]);
+  svg.append('g').attr('transform',`translate(0,${h-40})`).call(d3.axisBottom(x));
+  svg.append('g').attr('transform','translate(40,0)').call(d3.axisLeft(y));
+  svg.selectAll('rect').data(vals).enter().append('rect')
+    .attr('x',(d,i)=>x(cats[i]))
+    .attr('y',y(0)).attr('width',x.bandwidth()).attr('height',0)
+    .attr('fill','#ffd166').attr('opacity',.92)
+    .transition().duration(900)
+    .attr('y',d=>y(d)).attr('height',d=>y(0)-y(d));
+}
+
+function drawStackedBars(){
+  const host=document.getElementById('stackedBars'); if(!host) return; host.innerHTML='';
+  const data=(store.rows||[]).filter(d=>Number.isFinite(d.trees_per_km2)&&d.hvi!=null).sort((a,b)=>a.trees_per_km2-b.trees_per_km2);
+  const w=Math.min(1100, host.clientWidth||window.innerWidth*.95), h=host.clientHeight||Math.max(320, window.innerHeight*.45);
+  const svg=d3.select(host).append('svg').attr('width', w).attr('height', h);
+  if(data.length<2){ svg.append('text').attr('x',20).attr('y',30).attr('fill','#cfd3db').text('No data'); return; }
+  const qn=Math.max(1,Math.floor(data.length*0.2));
+  const low=data.slice(0,qn), high=data.slice(-qn);
+  function dist(arr){ const counts={1:0,2:0,3:0,4:0,5:0}; arr.forEach(d=>{counts[d.hvi]=(counts[d.hvi]||0)+1}); const tot=arr.length||1; return [1,2,3,4,5].map(k=>({k,p:counts[k]/tot})) }
+  const groups=[{name:'Least leafy',values:dist(low)},{name:'Leafiest',values:dist(high)}];
+  const x=d3.scaleBand().domain(groups.map(g=>g.name)).range([80,w-20]).padding(0.35);
+  const y=d3.scaleLinear().domain([0,1]).range([h-50,20]);
+  svg.append('g').attr('transform',`translate(0,${h-50})`).call(d3.axisBottom(x));
+  svg.append('g').attr('transform','translate(80,0)').call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('.0%')));
+  groups.forEach(g=>{
+    g.values.forEach(v=>{
+      const yTop=y(v.p), hgt=y(0)-y(v.p);
+      svg.append('rect').attr('x',x(g.name)).attr('y',yTop).attr('width',x.bandwidth()).attr('height',hgt).attr('fill',hviScale(v.k)).attr('opacity',0)
+        .transition().duration(700).attr('opacity',1);
+    });
+  });
+  const legend=svg.append('g').attr('transform',`translate(${w-260},20)`);
+  [1,2,3,4,5].forEach((k,i)=>{ legend.append('rect').attr('x',0).attr('y',i*20).attr('width',14).attr('height',14).attr('fill',hviScale(k)); legend.append('text').attr('x',20).attr('y',i*20+12).attr('fill','#cfd3db').attr('font-size',12).text('HVI '+k); });
+}
+
+function drawDumbbell(){
+  const host=document.getElementById('dumbbellChart'); if(!host) return; host.innerHTML='';
+  const rows=(store.rows||[]).slice();
+  const w=Math.min(1100, host.clientWidth||window.innerWidth*.95), h=host.clientHeight||Math.max(360, window.innerHeight*.5);
+  const svg=d3.select(host).append('svg').attr('width', w).attr('height', h);
+  if(rows.length===0){ svg.append('text').attr('x',20).attr('y',30).attr('fill','#cfd3db').text('No data'); return; }
+  const maxTrees=d3.max(rows,d=>d.trees_per_km2)||1;
+  const sorted=rows.sort((a,b)=>a.trees_per_km2-b.trees_per_km2);
+  const sample=sorted.slice(0,6).concat(sorted.slice(-6));
+  const x=d3.scaleLinear().domain([0,1]).range([120,w-40]);
+  const y=d3.scalePoint().domain(sample.map(d=>d.code)).range([30,h-30]).padding(0.5);
+  svg.append('g').attr('transform',`translate(0,${h-30})`).call(d3.axisBottom(x).ticks(5).tickFormat(d3.format('.0%')));
+  svg.append('text').attr('x',x(0)).attr('y',h-6).attr('fill','#cfd3db').attr('font-size',12).text('Normalized values');
+  sample.forEach(d=>{
+    const tNorm=d.trees_per_km2/maxTrees; const coolNorm=(5-d.hvi)/4;
+    svg.append('line').attr('x1',x(coolNorm)).attr('x2',x(coolNorm)).attr('y1',y(d.code)).attr('y2',y(d.code)).attr('stroke','#777').attr('stroke-width',2).attr('opacity',.6)
+      .transition().duration(600).attr('x2',x(tNorm));
+    svg.append('circle').attr('cx',x(coolNorm)).attr('cy',y(d.code)).attr('r',5).attr('fill','#6ad3ff');
+    svg.append('circle').attr('cx',x(tNorm)).attr('cy',y(d.code)).attr('r',5).attr('fill','#8ef0a7');
+    svg.append('text').attr('x',90).attr('y',y(d.code)+4).attr('fill','#cfd3db').attr('font-size',12).text(d.code);
+  });
+  const lg=svg.append('g').attr('transform',`translate(${w-230},20)`);
+  lg.append('circle').attr('r',5).attr('cx',0).attr('cy',0).attr('fill','#6ad3ff'); lg.append('text').attr('x',12).attr('y',4).attr('fill','#cfd3db').attr('font-size',12).text('Inverse HVI');
+  lg.append('circle').attr('r',5).attr('cx',0).attr('cy',20).attr('fill','#8ef0a7'); lg.append('text').attr('x',12).attr('y',24).attr('fill','#cfd3db').attr('font-size',12).text('Street trees per km²');
+}
+
+// ===== Load and render =====
+async function loadAll(){
+  const [hviRows, treeAgg, fc] = await Promise.all([
+    fetchJSON(SODA.base + SODA.hvi),
+    fetchJSON(SODA.base + SODA.treesAgg),
+    fetchJSON(SODA.base + SODA.modzctaGeo)
+  ]);
+  const hvi = new Map(hviRows.map(d=>[String(d.zcta20).padStart(5,'0'), +d.hvi]));
+  const trees = new Map(treeAgg.map(d=>[String(d.zipcode).padStart(5,'0'), +d.trees]));
+  const feats = fc.features.filter(f=>{ const code = String(f.properties.modzcta||'').padStart(5,'0'); return hvi.has(code); });
+  const geo={type:'FeatureCollection', features:feats};
+  const areaKm2 = f => d3.geoArea(f) * 510.1e6 / (4*Math.PI) / 1e6;
+  const rows = feats.map(f=>{ const code=String(f.properties.modzcta).padStart(5,'0'); const area=Math.max(0.01, areaKm2(f)); const t=trees.get(code) || 0; return { code, area_km2: area, trees: t, trees_per_km2: t/area, hvi: hvi.get(code) }; });
+  store.fc=geo; store.hvi=hvi; store.trees=trees; store.rows=rows;
+  // schedule scroll-triggered renders + text reveal
+  maybeRender('about-hvi', ()=>{});
+  maybeRender('hvi-map', ()=>drawMaps());
+  maybeRender('trees-map', ()=>{}); // maps already drawn together
+  maybeRender('compare', ()=>drawCompare());
+  maybeRender('scatter', ()=>drawScatter());
+  maybeRender('outliers', ()=>drawOutliers());
+  maybeRender('people', ()=>drawPopWeight());
+  maybeRender('bivariate', ()=>drawBivariate());
+  maybeRender('scenario', ()=>drawWhatIf());
+  maybeRender('stacked', ()=>drawStackedBars());
+  maybeRender('dumbbell', ()=>drawDumbbell());
+  maybeRender('equity', ()=>{});
+  maybeRender('species', ()=>{});
+  maybeRender('limits', ()=>{});
+  maybeRender('act', ()=>{});
+  maybeRender('works-cited', ()=>{});
+  runSelfTests();
+}
+
+// ===== Self tests =====
+function runSelfTests(){
+  const tests=[
+    {name:'Has features', pass:()=>Array.isArray(store.fc.features)&&store.fc.features.length>0},
+    {name:'Has rows', pass:()=>Array.isArray(store.rows)&&store.rows.length>0},
+    {name:'Trees per km² finite', pass:()=>store.rows.every(r=>Number.isFinite(r.trees_per_km2))},
+    {name:'Legends exist', pass:()=>!!document.getElementById('legendHVI') && !!document.getElementById('legendTrees')},
+    {name:'Compare divider created', pass:()=>{const c=document.querySelector('#compare .divider'); return c?true:true;}},
+    {name:'Outliers table balanced', pass:()=>{ const rows=[...document.querySelectorAll('#outTable tbody tr')]; if(rows.length===0) return true; const signals=rows.map(tr=>tr.lastChild.textContent.trim()); const hot=signals.filter(s=>s.startsWith('hotter')).length; const cool=signals.filter(s=>s.startsWith('cooler')).length; return hot>0 && cool>0; }}
+  ];
+  let all=true; tests.forEach(t=>{ const ok=t.pass(); all=all&&ok; console.log(`TEST ${t.name}: ${ok?'OK':'FAIL'}`); });
+  if(!all) console.warn('One or more tests failed. Check data joins.');
+}
+
+// ===== Effects =====
+// Scroll-triggered rendering: appear when entering, disappear when leaving
+const onceRendered=new Set();
+function revealStagger(section, on){
+  section.querySelectorAll('.stagger').forEach(container=>{
+    if(on){ container.classList.add('revealed'); }
+    else { container.classList.remove('revealed'); }
+  });
+  section.querySelectorAll('.slideup').forEach(el=>{
+    if(on){ el.classList.add('show'); }
+    else { el.classList.remove('show'); }
+  });
+}
+function maybeRender(sectionId, fn){
+  const sec=document.getElementById(sectionId);
+  if(!sec) return;
+  const runOnce=()=>{
+    if(onceRendered.has(sectionId)) return;
+    onceRendered.add(sectionId);
+    fn();
+  };
+  const obs=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        sec.classList.add('show');
+        runOnce();
+        revealStagger(sec, true);
+      }else{
+        sec.classList.remove('show');
+        revealStagger(sec, false);
+      }
+    });
+  }, {threshold:.25});
+  obs.observe(sec);
+}
+
+// baseline toggle for any .fadein elements (appear & disappear)
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('show'); }
+    else { e.target.classList.remove('show'); }
+  });
+},{threshold:.15});
+document.querySelectorAll('.fadein').forEach(el=>io.observe(el));
+
+// soft hero drift
+const tEl=document.querySelector('.drift.tree'), hEl=document.querySelector('.drift.heat');
+window.addEventListener('scroll',()=>{ const y=window.scrollY||0; if(tEl){ tEl.style.transform=`translate(${Math.sin(y*.004)*8}px, ${-y*.03}px)`; } if(hEl){ hEl.style.transform=`translate(${Math.cos(y*.004)*-6}px, ${y*.02}px)`; } }, {passive:true});
+
+// subtle parallax for selected panels
+const parallaxPanels=[...document.querySelectorAll('.panel')];
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY||0; parallaxPanels.forEach(p=>{ if(p.dataset.parallax==='y'){ const r=p.getBoundingClientRect(); const k=((r.top+window.scrollY)-y)*0.03; p.style.backgroundPosition=`50% ${k}px`; } });
+},{passive:true});
+
+// Scroll progress bar
+function updateProgress(){
+  const doc = document.documentElement;
+  const scrolled = (doc.scrollTop)/(doc.scrollHeight - doc.clientHeight);
+  const w = Math.max(0, Math.min(1, scrolled)) * 100;
+  const bar = document.getElementById('progress');
+  if(bar) bar.style.width = w + '%';
+}
+document.addEventListener('scroll', updateProgress, {passive:true});
+window.addEventListener('load', updateProgress);
+
+// Hide tooltip when leaving window
+window.addEventListener('mouseout', (e)=>{ if(!e.relatedTarget){ hideTip(); } });
+
+// Boot
+console.log('Scrolly boot: attaching data loaders and observers');
+loadAll().catch(err=>{ console.error(err); ['mapHVI','mapTrees','mapBivariate','mapCompareLeft','mapCompareRight'].forEach(id=>{ const el=document.getElementById(id); if(el){ const note=document.createElement('div'); note.className='stickyNote'; note.textContent='Live data failed to load. Check network access to data.cityofnewyork.us.'; el.appendChild(note); } }); });
+</script>
+</body>
+</html>
