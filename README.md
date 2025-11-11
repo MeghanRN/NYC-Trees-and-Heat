@@ -31,13 +31,13 @@ Aligned with the DxD 2026 theme **“Ecosystems and Cycles of Life,”** this pr
 - **MODZCTA Boundaries** — NYC Open Data  
   [https://data.cityofnewyork.us/api/geospatial/pri4-ifjk?method=export&format=GeoJSON](https://data.cityofnewyork.us/api/geospatial/pri4-ifjk?method=export&format=GeoJSON)
 
-### 🧹 Data Notes
+### Data Notes
 - Filtered to valid ZIP areas and living trees only.  
 - Aggregated by ZIP to compute tree density (trees per km²).  
 - Outliers winsorized to reduce skew.  
 - HVI matched to tree data using shared MODZCTA codes.  
 
-### ⚠️ Bias & Limitations
+### Bias & Limitations
 - Tree data from 2015 (outdated and excludes private or park trees).  
 - HVI compresses multiple factors into a single score (simplified).  
 - No population weighting, so area-based comparison may misrepresent exposure.  
@@ -45,7 +45,7 @@ Aligned with the DxD 2026 theme **“Ecosystems and Cycles of Life,”** this pr
 
 ---
 
-## 🧩 Features
+## Features
 - Scroll-based storytelling flow that guides the viewer through multiple scenes  
 - Dual map view: compare Heat Vulnerability vs. Tree Density  
 - Hover and tooltip interactions for detailed values  
@@ -56,12 +56,12 @@ Aligned with the DxD 2026 theme **“Ecosystems and Cycles of Life,”** this pr
 
 ---
 
-## 💭 Reflection
+## Reflection
 > The NYC Trees & Heat project demonstrates how data visualization can make environmental inequity visible. What works well is how the scrolling story and interactive maps let users connect data with place — they can literally see how areas with more trees tend to have lower heat vulnerability. The live NYC Open Data connection keeps the project grounded in real, public information. What doesn’t work as well yet is the uneven quality of the data: the tree census is from 2015, and it only includes street trees, not those in parks or private yards. Also, some high-vulnerability areas don’t fit the trend, showing that factors like housing quality and air conditioning access are equally important. Next, I’d like to add population weighting and accessibility features like better keyboard navigation. Overall, the project fits the “Ecosystems and Cycles of Life” theme by showing how urban ecosystems — made up of both people and trees — shape cycles of heat, shade, and resilience across the city.
 
 ---
 
-## ⚙️ Tech
+## Tech
 - **Language:** HTML
 - **Library:** D3.js (v7)  
 - **Hosting:** GitHub Pages  
@@ -69,7 +69,7 @@ Aligned with the DxD 2026 theme **“Ecosystems and Cycles of Life,”** this pr
 
 ---
 
-## 🧑‍💻 Instructions
+## Instructions
 1. Clone or download this repository.  
 2. Open `index.html` in your browser, or visit the GitHub Pages link above.  
 3. Scroll through the story, hover on neighborhoods, and drag the map divider to explore differences.
