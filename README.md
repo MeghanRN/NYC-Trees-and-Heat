@@ -11,7 +11,7 @@ This project explores how the presence of street trees relates to neighborhood h
 ---
 
 ## Theme Connection
-Aligned with the DxD 2026 theme **“Ecosystems and Cycles of Life,”** this project treats the city as a living ecosystem. Trees are part of the cycle of growth and renewal that helps regulate heat and sustain urban life. The visualization shows how the absence or abundance of trees reflects broader social and environmental systems — how the city breathes, grows, and struggles against climate stress.
+Aligned with the DxD 2026 theme **“Ecosystems and Cycles of Life,”** this project treats the city as a living ecosystem. Trees are part of the cycle of growth and renewal that helps regulate heat and sustain urban life. The visualization shows how the absence or abundance of trees reflects broader social and environmental systems. IE, how the city breathes, grows, and struggles against climate stress.
 
 ---
 
