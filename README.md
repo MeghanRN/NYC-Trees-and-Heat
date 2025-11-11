@@ -16,12 +16,12 @@ Aligned with the DxD 2026 theme **“Ecosystems and Cycles of Life,”** this pr
 ---
 
 ## Live Demo
-👉 **View the project here:**  
+**View the project here:**  
 [https://meghanrn.github.io/NYC-Trees-and-Heat/](https://meghanrn.github.io/NYC-Trees-and-Heat/)  
 
 ---
 
-## 📊 Datasets
+## Datasets
 - **Heat Vulnerability Index (HVI)** — NYC Department of Health and Mental Hygiene  
   [https://data.cityofnewyork.us/resource/4mhf-duep.json](https://data.cityofnewyork.us/resource/4mhf-duep.json)
 
