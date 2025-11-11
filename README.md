@@ -52,7 +52,7 @@ Aligned with the DxD 2026 theme **“Ecosystems and Cycles of Life,”** this pr
 - Scatter plot showing the relationship between trees and heat  
 - Highlighted outlier neighborhoods that defy the general trend  
 - Bivariate equity map highlighting high-HVI/low-tree areas  
-- Fully client-side — no backend or build tools required  
+- Fully client-side (no backend or build tools required)   
 
 ---
 
