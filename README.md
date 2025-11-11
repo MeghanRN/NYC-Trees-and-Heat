@@ -1,10 +1,8 @@
 # 🌳 NYC Trees & Heat — Interactive Visualization
 
-**Author:** <your name>  
-**Class:** Data Visualization – Midterm Part 2  
-**Instructor Due Date:** Tuesday, Oct 21  
-**Assignment:** Assignment 7 — “Midterm Part 2” (Data Through Design 2026)
-
+**Author:** Meghan Kret
+**Class:** Data Visualization - Midterm Part 2  
+**Due Date:** November 11 2025
 ---
 
 ## 🧭 Overview
