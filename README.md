@@ -1,25 +1,23 @@
 # 🌳 NYC Trees & Heat
-
 ---
 **Author:** Meghan Kret   
 **Class:** Data Visualization - Midterm Part 2  
-**Due Date:** November 11 2025    
----
+**Due Date:** November 11 2025   
 
-## 🧭 Overview
+---
+## Overview
 This project explores how the presence of street trees relates to neighborhood heat vulnerability across New York City. It visualizes the connection between canopy cover and climate risk using live NYC Open Data. Built as a scroll-based D3.js experience, the piece invites users to explore patterns of heat, shade, and equity across the five boroughs.
 
 ---
 
-## 🎨 Theme Connection
+## Theme Connection
 Aligned with the DxD 2026 theme **“Ecosystems and Cycles of Life,”** this project treats the city as a living ecosystem. Trees are part of the cycle of growth and renewal that helps regulate heat and sustain urban life. The visualization shows how the absence or abundance of trees reflects broader social and environmental systems — how the city breathes, grows, and struggles against climate stress.
 
 ---
 
-## 🌐 Live Demo
+## Live Demo
 👉 **View the project here:**  
-[https://yourusername.github.io/nyc-trees-heat/](https://yourusername.github.io/nyc-trees-heat/)  
-*(Replace “yourusername” with your actual GitHub username once published.)*
+[https://meghanrn.github.io/NYC-Trees-and-Heat/](https://meghanrn.github.io/NYC-Trees-and-Heat/)  
 
 ---
 
@@ -64,7 +62,7 @@ Aligned with the DxD 2026 theme **“Ecosystems and Cycles of Life,”** this pr
 ---
 
 ## ⚙️ Tech
-- **Language:** HTML, CSS, JavaScript  
+- **Language:** HTML
 - **Library:** D3.js (v7)  
 - **Hosting:** GitHub Pages  
 - **Data Source:** Live from NYC Open Data APIs  
@@ -75,15 +73,3 @@ Aligned with the DxD 2026 theme **“Ecosystems and Cycles of Life,”** this pr
 1. Clone or download this repository.  
 2. Open `index.html` in your browser, or visit the GitHub Pages link above.  
 3. Scroll through the story, hover on neighborhoods, and drag the map divider to explore differences.
-
----
-
-## 🧠 Credits
-Created for **Assignment 7: Midterm Part 2**  
-**Course:** Data Visualization — Fall 2025  
-**Instructor:** <Instructor’s Name>
-
----
-
-## 📬 Contact
-For questions or feedback, reach out via GitHub Issues or email.
